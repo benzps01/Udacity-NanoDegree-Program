@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        .hidden {
+            display: none;
+        }
+        ul {
+            list-style: none;
+            padding-left: 0;
+            width: 300px;
+        }
+        li {
+            clear: both;
+        }
+        li button {
+            background: none;
+            border: none;
+            outline: none;
+            color: red;
+            float: right;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        .lists-wrapper, .todos-wrapper {
+            display: inline-block;
+            vertical-align: top;
+        }
+    </style>
+</head>
+<body>
+    <div class="lists-wrapper">
+        <h2>Todo Lists</h2>
+        <form id='list_form' method="POST" action="/todolists/create">
+            <label for="todolist">Create List : </label>
+            <input type="text" id='todolist-input' name="todolist" data-id="{{ active_list.id }}" placeholder="New List"/>
+            <button type="submit">Create List</button>
+        </form>
+        <ul id='lists'>
+            <br>
+            {% for list in lists %}
+            <li>
+                <input class="list-check-completed" data-id="{{ list.id }}" type="checkbox" />
+                <a href="/lists/{{ list.id }}">
+                    {{ list.name }}
+                </a>
+                <button class="delete-list" data-id="{{ list.id }}">&cross;</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="todos-wrapper">
+        <h2>Todo Items</h2>
+        <form id='todo_form' method="POST" action="/todos/create">
+            <input id="list_id" type="hidden" value="{{ active_list.id }}">
+            <label for="description">Create Task : </label>
+            <input type="text" id='description' name="description" placeholder="Task description"/>
+            <button type="submit">Create Task</button>
+        </form>
+        <div id="error" class="hidden">Something went wrong!</div>
+        <h4>{{ active_list.name }}</h4>
+        <ul id="todos">
+            {% for todo in todos %}
+            <li>
+                <input class="todo-check-completed" data-id="{{ todo.id }}" type="checkbox" name="complete" id="complete"
+                {% if todo.completed %} checked {% endif %} />
+                {{ todo.description }}
+                <button class="delete-todo" data-id="{{ todo.id }}">&cross;</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <script>
+        let deleteBtns;
+        const listcheckboxes = document.querySelectorAll('.list-check-completed');
+        for (let i = 0; i < listcheckboxes.length; i++) {
+            const checkbox = listcheckboxes[i];
+            checkbox.onchange = function(e) {
+                if (e.target.checked) {
+                    const listId = e.target.dataset.id;
+                    fetch('/lists/' + listId + '/set-completed', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(function() {
+                    document.getElementById('error').className = 'hidden';
+
+                    const todoCheckboxes = document.querySelectorAll('todo-check-completed');
+
+                    for (let i=0; i < todoCheckboxes.length; i++) {
+                        const checkbox = todoCheckboxes[i];
+
+                        checkbox.checked = true;
+                    }
+                })
+                .catch(function() {
+                document.getElementById('error').className = '';
+            })
+        }
+    }
+
+        const todoCheckboxes = document.querySelectorAll('.todo-check-completed');
+        for (let i = 0; i < todoCheckboxes.length; i++) {
+            const checkbox = todoCheckboxes[i];
+            checkbox.onchange = function(e) {
+                const newCompleted = e.target.checked;
+                const todoId = e.target.dataset.id;
+                fetch('/todos/' + todoId + '/set-completed', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        'completed': newCompleted
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(function() {
+                    document.getElementById('error').className = 'hidden';
+                })
+                .catch(function() {
+                document.getElementById('error').className = '';
+            })
+        }
+    }
+
+        deleteBtns = document.querySelectorAll('.delete-todo')
+
+        for (let i = 0; i < deleteBtns.length; i++) {
+            const deleteBtn = deleteBtns[i];
+            deleteBtn.onclick = function(e) {
+                console.log("Delete Event", e);
+                const todoId = e.target.dataset.id;
+                fetch('/todos/' + todoId + '/delete',{
+                    method: "DELETE"
+                })
+                .then(function(){
+                    console.log('Parent?', e.target);
+                    const item = e.target.parentElement;
+                    item.remove();
+                    document.getElementById("error").className="hidden";
+                    window.location.reload(true);
+                })
+                .catch(function(){
+                    console.error(e);
+                    document.getElementById("error").className="";
+                });
+            };
+        }
+
+        deleteListBtns = document.querySelectorAll('.delete-list')
+
+        for (let i = 0; i < deleteListBtns.length; i++) {
+            const deleteBtn = deleteListBtns[i];
+            deleteBtn.onclick = function(e) {
+                console.log("Delete Event", e);
+                const listId = e.target.dataset.id;
+                fetch('/lists/' + listId + '/delete',{
+                    method: "DELETE"
+                })
+                .then(function(){
+                    console.log('Parent?', e.target);
+                    const item = e.target.parentElement;
+                    item.remove();
+                    document.getElementById("error").className="hidden";
+                    window.location.reload(true);
+                })
+                .catch(function(){
+                    console.error(e);
+                    document.getElementById("error").className="";
+                });
+            };
+        }
+
+        document.getElementById('todo_form').onsubmit = function(e) {
+            e.preventDefault();
+            fetch('/todos/create', {
+                method: 'POST',
+                body: JSON.stringify({
+                    'description': document.getElementById('description').value,
+                    'list_id': document.getElementById('list_id').value
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(jsonResponse) {
+                // console.log(jsonResponse);
+                const li = document.createElement('li');
+                li.innerHTML = jsonResponse['description'];
+                document.getElementById('todos').appendChild(li)
+                document.getElementById('error').className = 'hidden';
+                window.location.reload(true);    //reloads the page since we are dynamically adding nodes, Dynamically added nodes don't have listeners unless you manually add them too
+            })
+            .catch(function() {
+                document.getElementById('error').className = '';
+            })
+        }
+    }
+
+    document.getElementById('list_form').onsubmit = function(e) {
+            e.preventDefault();
+            fetch('/todolists/create', {
+                method: 'POST',
+                body: JSON.stringify({
+                    'name': document.getElementById('todolist-input').value
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(jsonResponse) {
+                const li = document.createElement('li');
+                li.innerHTML = jsonResponse['description'];
+                document.getElementById('lists').appendChild(li)
+                document.getElementById('error').className = 'hidden';
+                window.location.reload(true);    //reloads the page since we are dynamically adding nodes, Dynamically added nodes don't have listeners unless you manually add them too
+            })
+            .catch(function() {
+                document.getElementById('error').className = '';
+            })
+        }
+
+    </script>
+</body>
+</html>
