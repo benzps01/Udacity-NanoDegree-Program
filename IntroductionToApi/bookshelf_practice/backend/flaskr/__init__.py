@@ -1,6 +1,6 @@
 import os
 from flask import Flask, request, abort, jsonify
-from flask_sqlalchemy import SQLAlchemy  # , or_
+from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
@@ -70,8 +70,8 @@ def create_app(test_config=None):
     #completed
     @app.route('/books/<int:book_id>', methods=['PATCH'])
     def update_rating(book_id):
-        rating = int(request.get_json()['rating'])
         try:
+            rating = int(request.get_json()['rating'])
             edit_book = Book.query.filter(Book.id==book_id).one_or_none()
             if edit_book is None:
                 abort(404)
@@ -119,11 +119,10 @@ def create_app(test_config=None):
     #       Your new book should show up immediately after you submit it at the end of the page.
     @app.route('/books', methods=['POST'])
     def create_book():
-        book_title = request.get_json()['title']
-        book_author = request.get_json()['author']
-        book_rating = request.get_json()['rating']
-        
         try:
+            book_title = request.get_json()['title']
+            book_author = request.get_json()['author']
+            book_rating = request.get_json()['rating']
             new_book = Book(title=book_title, author=book_author, rating=book_rating)
             # db.session.add(new_book)
             # db.session.commit()
@@ -170,7 +169,7 @@ def create_app(test_config=None):
             'success': False,
             'error': 405,
             'message': 'Method not Allowed'
-        })
+        }), 405
     
     
     return app
