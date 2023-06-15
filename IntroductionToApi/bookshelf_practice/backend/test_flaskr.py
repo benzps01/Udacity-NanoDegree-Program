@@ -2,7 +2,7 @@ import unittest
 import os
 import json
 from flaskr import create_app
-from models import setup_db, Book
+from models import setup_db, Book, db
 
 
 class BookTestCase(unittest.TestCase):
@@ -63,14 +63,18 @@ class BookTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Bad Request')
         
     def test_delete_book(self):
-        res = self.client().delete('/books/1')
+        with self.app.app_context():
+            book_to_delete = Book(id=2, title='Asymmetry: A Novel', author='Lisa Halliday', rating=4)
+            db.session.add(book_to_delete)
+            db.session.commit()
+        res = self.client().delete('/books/2')
         data = json.loads(res.data)
         with self.app.app_context():
-            book = Book.query.filter(Book.id == 1).one_or_none()
+            book = Book.query.filter(Book.id == 2).one_or_none()
         
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertEqual(data['deleted'], 1)
+        self.assertEqual(data['deleted'], 2)
         self.assertTrue(len(data['books']))
         self.assertTrue(data['total_books'])
         self.assertEqual(book, None)
@@ -101,7 +105,6 @@ class BookTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['error'], 405)
         self.assertEqual(data['message'], 'Method not Allowed')
-        
         
 
 # Make the tests conveniently executable    
