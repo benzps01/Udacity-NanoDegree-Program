@@ -92,7 +92,7 @@ class App extends Component {
       },
       error: (error) => {
         alert("Unable to complete search. Please try your request again");
-        return;
+        return error;
       },
     });
   };
