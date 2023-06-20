@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import $ from "jquery";
-
 import "../stylesheets/FormView.css";
 
 class FormView extends Component {
@@ -41,10 +40,37 @@ class FormView extends Component {
     });
   };
 
-  handleSearch = (event) => {
-    event.preventDefault();
-    this.props.searchBooks(this.state.search);
+  searchBooks = (search) => {
+    $.ajax({
+      url: "/books", //TODO: update request URL
+      type: "POST",
+      dataType: "json",
+      contentType: "application/json",
+      data: JSON.stringify({ search: search }),
+      xhrFields: {
+        withCredentials: true,
+      },
+      crossDomain: true,
+      success: (result) => {
+        this.setState({
+          totalBooks: result.total_books,
+          books: result.books,
+          page: 1,
+        });
+        document.getElementById("search-form").reset();
+        return;
+      },
+      error: (error) => {
+        alert("Unable to complete search. Please try your request again");
+        return error;
+      },
+    });
   };
+
+  // handleSearch = (event) => {
+  //   event.preventDefault();
+  //   this.props.searchBooks(this.state.search);
+  // };
 
   handleChange = (event) => {
     this.setState({ [event.target.name]: event.target.value });
@@ -53,12 +79,12 @@ class FormView extends Component {
   render() {
     return (
       <div id="form-view">
-        <div className="search" style={{ display: "None" }}>
+        <div className="search">
           <h2>Search</h2>
           <form
             className="FormView"
             id="search-form"
-            onSubmit={this.handleSearch}
+            onSubmit={this.searchBooks}
           >
             <input type="text" name="search" onChange={this.handleChange} />
             <input type="submit" className="button" value="Submit" />

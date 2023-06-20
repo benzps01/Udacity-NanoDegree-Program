@@ -1,10 +1,11 @@
 import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from flask_cors import CORS
 import random
 
-from models import setup_db, Book, db
+from models import Book, setup_db, db
 
 BOOKS_PER_SHELF = 8
 
@@ -14,16 +15,25 @@ BOOKS_PER_SHELF = 8
 #   - Make sure for each route that you're thinking through when to abort and with which kind of error
 #   - If you change any of the response body keys, make sure you update the frontend to correspond.
 
-def paginate_books(request):
+def paginate_books(request, current_books=None):
     page = request.args.get('page', 1, type=int)
-    books = Book.query.order_by(Book.id).paginate(page=page, per_page=BOOKS_PER_SHELF)
-    books_array = [book.format() for book in books.items]
+    if current_books:
+        #print(current_books)
+        #print('This current book')
+        books_array = [book.format() for book in current_books]
+        #print('Books_array', books_array)
+    else:
+        books = Book.query.order_by(Book.id).paginate(page=page, per_page=BOOKS_PER_SHELF)
+        books_array = [book.format() for book in books.items]
     return books_array
 
-def create_app(test_config=None):
+def create_app(db_uri="",test_config=None):
     # create and configure the app
     app = Flask(__name__)
-    setup_db(app)
+    if db_uri:
+        setup_db(app, db_uri)
+    else:
+        setup_db(app)
     CORS(app)
 
     # CORS Headers
@@ -120,22 +130,37 @@ def create_app(test_config=None):
     @app.route('/books', methods=['POST'])
     def create_book():
         try:
-            book_title = request.get_json()['title']
-            book_author = request.get_json()['author']
-            book_rating = request.get_json()['rating']
-            new_book = Book(title=book_title, author=book_author, rating=book_rating)
-            # db.session.add(new_book)
-            # db.session.commit()
-            new_book.insert()
+            book_title = request.get_json().get('title')
+            book_author = request.get_json().get('author')
+            book_rating = request.get_json().get('rating')
+            search_term = request.get_json().get('search')
+            #print(book_title)
+            #print(search_term)
+            #search_term = search_term.lower().lstrip().rstrip()
+            if (search_term):
+                #print("checking this")
+                books_list = Book.query.order_by(Book.id).filter(Book.title.ilike(f'%{search_term}%'))
+                #print("books_list",books_list)
+                current_books = paginate_books(request, books_list)
+                #print("current_books",current_books)
+                return jsonify({
+                    'success': True,
+                    'books': current_books,
+                    'total_books': len(books_list.all())
+                })
+            else:
+                new_book = Book(title=book_title, author=book_author, rating=book_rating)
+                # db.session.add(new_book)
+                # db.session.commit()
+                new_book.insert()
             
-            current_books = paginate_books(request)
-            return jsonify({
-                'success': True,
-                'created': new_book.id,
-                'books': current_books,
-                'total_books': len(Book.query.all())
-            })
-
+                current_books = paginate_books(request)
+                return jsonify({
+                    'success': True,
+                    'created': new_book.id,
+                    'books': current_books,
+                    'total_books': len(Book.query.all())
+                })
         except:
             abort(422)
            
@@ -148,7 +173,7 @@ def create_app(test_config=None):
         }), 400      
             
     @app.errorhandler(404)
-    def not_found(error):
+    def resouces_not_found(error):
         return jsonify({
             'success': False,
             'error': 404,
