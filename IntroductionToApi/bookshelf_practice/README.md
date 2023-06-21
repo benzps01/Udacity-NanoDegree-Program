@@ -81,7 +81,7 @@ Bookshelf API is built keeping in mind REST. This API can be used to add new boo
 
 Base URL:
 
-- base URL: `http://127.0.0.1:5000/`
+- base URL: `http://127.0.0.1:5000/`<br>
   At the moment, this can be only run locally since this is not hosted. This is set as a proxy in the frontend configuration.
 
 Authentication:
@@ -179,25 +179,27 @@ Error codes returned are as follows:
    }
    ```
 
-4. Create Book (Create a new book)
-   endpoint: ` '/books'``
-method:  `"POST"`sample request:`curl http://127.0.0.1:5000/books?page=3 -X POST -H "Content-Type: application/json" -d '{"title":"Neverwhere", "author":"Neil Gaiman", "rating":"5"}'```
+4. Create Book (Create a new book)<br>
+   endpoint: '/books'<br>
+   method: 'POST'<br>
+   sample request: `curl http://127.0.0.1:5000/books?page=3 -X POST -H "Content-Type: application/json" -d '{"title":"Neverwhere", "author":"Neil Gaiman", "rating":"5"}'`<br>
    return:
-   ```
-   {
-   "books": [
-   {
-   "author": "Neil Gaiman",
-   "id": 24,
-   "rating": 5,
-   "title": "Neverwhere"
-   }
-   ],
-   "created": 24,
-   "success": true,
-   "total_books": 3
-   }
-   ```
+
+```
+{
+"books": [
+{
+"author": "Neil Gaiman",
+"id": 24,
+"rating": 5,
+"title": "Neverwhere"
+}
+],
+"created": 24,
+"success": true,
+"total_books": 3
+}
+```
 
 ## Authors
 
