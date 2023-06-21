@@ -1,22 +1,87 @@
-# API Documentation Practice
+# Benson's Bookshelf
 
-In this exercise, your task is to practice writing documentation for the bookstore app we created earlier.
+This is a bookshelf application created for those users who want to create a database of all their favourite books with the ability to rate them as they see fit.
 
-You'll soon be writing documentation for your final project (the Trivia API), after which you'll get feedback from a reviewer. You can think of this as some rudimentary practice to prepare for that.
+## Pre-requisites and Local Development
 
-At each step, you can compare what you've written with our own version. Of course, **there isn't a single correct way to write a piece of documentation**, so your version may look quite different. However, there are principles and practices you should follow in order to produce quality documentation, and we'll point this out so you can check whether you've incorporated them in what you wrote.
+Here we have used postgres as a database, so postgres must be installed beforehand with database bookshelf.
 
-## Getting started
+To start postgres server run `pg_ctl -D file_path(eg.C:\postgres\data) start`
 
-Now, add a Getting Started section to your documentation. Remember, this should include at least your base URL and an explanation of authentication. Feel free to provide other information that is relevant for your API
+There are also 2 files to create table and populate the table
 
-### BookShelf API Introduction
+- setup.sql
+- books.psql
+
+on a bash terminal you can run the following files using the commands:
+
+```
+psql -U postgres -d bookshelf -h localhost -p 5432 -f setup.sql
+psql -U postgres -d bookshelf -h localhost -p 5432 -f books.psql
+```
+
+## Note: you need to be in the same folder as the files above to run the scripts
+
+### Backend
+
+The backend server is built on flask framework.<br>
+You Need to install all the packages from the requirements.txt file
+
+```
+pip install -r requirements.txt
+```
+
+Next, to start flask app run:
+
+### Note node.js needs to be installed first
+
+```
+With debug mode:
+npm run start-flask-server-debug
+
+without debug mode:
+npm run start-flask-server
+```
+
+The application is run on `http://127.0.0.1:5000/` by default and is a proxy in the frontend configuration
+
+### Frontend
+
+The frontend is built using React.js framework.<br>
+All the packages required are already mentioned in the packages.json file<br>
+First install all the required packages for react:
+
+### Note node.js needs to be installed first
+
+`npm install`
+
+Start the react application using:
+`npm start`
+
+By default the frontend will run on `localhost:3000`
+
+### Tests
+
+Navigate to the backend folder to run the tests using the commands:
+
+```
+dropdb bookshelf_test
+createdb bookshelf_test
+psql bookshelf_test < books.psql
+python test_flaskr.py
+```
+
+The first time you run the tests, omit the dropdb command
+
+## API Reference
+
+### Getting Started
 
 Bookshelf API is built keeping in mind REST. This API can be used to add new books, search books, delete books and also change the ratings. This API accepts form-encoded requests and returns with JSON-encoded reponses using standard HTTP response codes and authentication.
 
 Base URL:
 
-- base URL: http://127.0.0.1:5000/
+- base URL: `http://127.0.0.1:5000/`
   At the moment, this can be only run locally since this is not hosted. This is set as a proxy in the frontend configuration.
 
 Authentication:
@@ -25,41 +90,35 @@ Authentication:
 
 ### Error Handling
 
-Now, add an Error Handling section to your documentation. It should include the format of the error responses the client can expect as well as which status codes you use.
-
-- Response codes
-- Messages
-- Error types
-
 Errors are returned as follows:
+
+```
 {
 "success": False,
 "error": 404,
 "message": "Resource not found"
 }
+```
 
-Error codes are as follows:
+Error codes returned are as follows:
 
+```
 - 400 (Bad Request)
 - 404 (Not Found)
 - 405 (Method Not Allowed)
 - 422 (unprocessable)
+```
 
-### Endpoint Library
-
-Now, add an Endpoint Library section to your documentation. Make sure that endpoints, methods and returned data are all clear. Consider including sample requests for clarity
-
-- Organized by resource
-- Include each endpoint
-- Sample request
-- Arguments including data types
-- Response object including status codes and data types
+### Endpoints
 
 1. Show Books (list out all the books)
-   endpoint: '/books'
-   method: "GET"
-   sample request: curl 'http://127.0.0.1/books'
-   return: {
+   endpoint: `'/books'`
+   method: `"GET"`
+   sample request: `curl 'http://127.0.0.1/books'`
+   return:
+
+   ```
+   {
    "books": [
    {
    "author": "Stephen King",
@@ -77,21 +136,29 @@ Now, add an Endpoint Library section to your documentation. Make sure that endpo
    "success": true,
    "total_books": 2
    }
+   ```
 
 2. Update Rating (Change rating of a book)
-   endpoint: '/books/<int:book_id>'
-   method: "PATCH"
-   sample request: curl http://127.0.0.1:5000/books/15 -X PATCH -H "Content-Type: application/json" -d '{"rating":"1"}'
-   return: {
+   endpoint: `'/books/<int:book_id>'`
+   method: `"PATCH"`
+   sample request: `curl http://127.0.0.1:5000/books/15 -X PATCH -H "Content-Type: application/json" -d '{"rating":"1"}'`
+   return:
+
+   ```
+   {
    "id": 15,
    "success": true
    }
+   ```
 
 3. Delete Book (Delete a particular book)
-   endpoint: '/books/<int:book_id>'
-   method: DELETE
-   sample request: curl -X DELETE http://127.0.0.1:5000/books/16?page=2
-   return: {
+   endpoint: `'/books/<int:book_id>'`
+   method: `"DELETE"`
+   sample request: `curl -X DELETE http://127.0.0.1:5000/books/16?page=2`
+   return:
+
+   ```
+   {
    "books": [
    {
    "author": "Gina Apostol",
@@ -110,12 +177,14 @@ Now, add an Endpoint Library section to your documentation. Make sure that endpo
    "success": true,
    "total_books": 2
    }
+   ```
 
 4. Create Book (Create a new book)
-   endpoint: '/books'
-   method: 'POST'
-   sample request: curl http://127.0.0.1:5000/books?page=3 -X POST -H "Content-Type: application/json" -d '{"title":"Neverwhere", "author":"Neil Gaiman", "rating":"5"}'
-   return: {
+   endpoint: ` '/books'``
+method:  `"POST"`sample request:`curl http://127.0.0.1:5000/books?page=3 -X POST -H "Content-Type: application/json" -d '{"title":"Neverwhere", "author":"Neil Gaiman", "rating":"5"}'```
+   return:
+   ```
+   {
    "books": [
    {
    "author": "Neil Gaiman",
@@ -128,3 +197,8 @@ Now, add an Endpoint Library section to your documentation. Make sure that endpo
    "success": true,
    "total_books": 3
    }
+   ```
+
+## Authors
+
+Benson Sabu Pallivathukkal
