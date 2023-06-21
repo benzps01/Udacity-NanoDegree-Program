@@ -1,121 +1,130 @@
-## Local Development 
-The instructions below are meant for the local setup only. The classroom workspace is already set for your to start practicing. 
+# API Documentation Practice
 
-#### Pre-requisites
-* Developers using this project should already have Python3, pip and node installed on their local machines.
+In this exercise, your task is to practice writing documentation for the bookstore app we created earlier.
 
+You'll soon be writing documentation for your final project (the Trivia API), after which you'll get feedback from a reviewer. You can think of this as some rudimentary practice to prepare for that.
 
-* **Start your virtual environment** 
-From the backend folder run
-```bash
-# Mac users
-python3 -m venv venv
-source venv/bin/activate
-# Windows users
-> py -3 -m venv venv
-> venv\Scripts\activate
-```
+At each step, you can compare what you've written with our own version. Of course, **there isn't a single correct way to write a piece of documentation**, so your version may look quite different. However, there are principles and practices you should follow in order to produce quality documentation, and we'll point this out so you can check whether you've incorporated them in what you wrote.
 
-* **Install dependencies**<br>
-From the backend folder run 
-```bash
-# All required packages are included in the requirements file. 
-pip3 install -r requirements.txt
-# In addition, you will need to UNINSTALL the following:
-pip3 uninstall flask-socketio -y
-```
+## Getting started
 
+Now, add a Getting Started section to your documentation. Remember, this should include at least your base URL and an explanation of authentication. Feel free to provide other information that is relevant for your API
 
-### Step 0: Start/Stop the PostgreSQL server
-Mac users can follow the commands below:
-```bash
-which postgres
-postgres --version
-# Start/stop
-pg_ctl -D /usr/local/var/postgres start
-pg_ctl -D /usr/local/var/postgres stop 
-```
-Windows users can follow the commands below:
-- Find the database directory, it should be something like that: *C:\Program Files\PostgreSQL\13.2\data*
-- Then, in the command line, execute the folllowing command: 
-```bash
-# Start the server
-pg_ctl -D "C:\Program Files\PostgreSQL\13.2\data" start
-# Stop the server
-pg_ctl -D "C:\Program Files\PostgreSQL\13.2\data" stop
-```
-If it shows that the *port already occupied* error, run:
-```bash
-sudo su - 
-ps -ef | grep postmaster | awk '{print $2}'
-kill <PID> 
-```
+### BookShelf API Introduction
 
-### Step 1 - Create and Populate the database
-1. **Verify the database username**<br>
-Verify that the database user in the `/backend/books.psql`, `/backend/models.py`, and `/backend/test_flaskr.py` files must be either the `student` or `postgres` (default username). FYI, the classroom workspace uses the `student`/`student` user credentials, whereas, the local implementation can use the dafault `postgres` user without a password as well. (See the `/backend/setup.sql` for more details!)
+Bookshelf API is built keeping in mind REST. This API can be used to add new books, search books, delete books and also change the ratings. This API accepts form-encoded requests and returns with JSON-encoded reponses using standard HTTP response codes and authentication.
 
-2. **Create the database and a user**<br>
-In your terminal, navigate to the */nd0044-c2-API-Development-and-Documentation-exercises/1_Requests_Starter/backend/* directory, and run the following:
-```bash
-cd nd0044-c2-API-Development-and-Documentation-exercises/1_Requests_Starter/backend
-# Connect to the PostgreSQL
-psql postgres
-#View all databases
-\l
-# Create the database, create a user - `student`, grant all privileges to the student
-\i setup.sql
-# Exit the PostgreSQL prompt
-\q
-```
+Base URL:
 
+- base URL: http://127.0.0.1:5000/
+  At the moment, this can be only run locally since this is not hosted. This is set as a proxy in the frontend configuration.
 
-3. **Create tables**<br>
-Once your database is created, you can create tables (`bookshelf`) and apply contraints
-```bash
-# Mac users
-psql -f books.psql -U student -d bookshelf
-# Linux users
-su - postgres bash -c "psql bookshelf < /path/to/exercise/backend/books.psql"
+Authentication:
 
-```
-**You can even drop the database and repopulate it, if needed, using the commands above.** 
+- This version of the app doesn't require API keys or authentication.
 
+### Error Handling
 
-### Step 2: Complete the ToDos and Start the backend server
-Navigate to the `/backend/flaskr/__init__.py` file, and finish all the `@TODO` thereby building out the necessary routes and logic to get the backend of your app up and running.
+Now, add an Error Handling section to your documentation. It should include the format of the error responses the client can expect as well as which status codes you use.
 
-Once you've written your code, start your (backend) Flask server by running the command below from the `/backend/` directory.
-```
-export FLASK_APP=flaskr
-export FLASK_ENV=development
-flask run
-```
-These commands put the application in development and directs our application to use the `__init__.py` file in our flaskr folder. Working in development mode shows an interactive debugger in the console and restarts the server whenever changes are made. If running locally on Windows, look for the commands in the [Flask documentation](http://flask.pocoo.org/docs/1.0/tutorial/factory/).
+- Response codes
+- Messages
+- Error types
 
-The application will run on `http://127.0.0.1:5000/` by default and is set as a proxy in the frontend configuration. Also, the current version of the application does not require authentication or API keys. 
+Errors are returned as follows:
+{
+"success": False,
+"error": 404,
+"message": "Resource not found"
+}
 
+Error codes are as follows:
 
+- 400 (Bad Request)
+- 404 (Not Found)
+- 405 (Method Not Allowed)
+- 422 (unprocessable)
 
-### Step 3: Start the frontend
-(You can start the frontend even before the backend is up!)
-From the `frontend` folder, run the following commands to start the client: 
-```
-npm install // only once to install dependencies
-npm start 
-```
-By default, the frontend will run on `localhost:3000`. Close the terminal if you wish to stop the frontend server. 
+### Endpoint Library
 
----
+Now, add an Endpoint Library section to your documentation. Make sure that endpoints, methods and returned data are all clear. Consider including sample requests for clarity
 
-## Additional information
-#### Running Tests
-If any exercise needs testing, navigate to the `/backend` folder and run the following commands: 
-```bash
-psql postgres
-dropdb bookshelf_test
-createdb bookshelf_test
-\q
-psql bookshelf_test < books.psql
-python test_flaskr.py
-```
+- Organized by resource
+- Include each endpoint
+- Sample request
+- Arguments including data types
+- Response object including status codes and data types
+
+1. Show Books (list out all the books)
+   endpoint: '/books'
+   method: "GET"
+   sample request: curl 'http://127.0.0.1/books'
+   return: {
+   "books": [
+   {
+   "author": "Stephen King",
+   "id": 1,
+   "rating": 5,
+   "title": "The Outsider: A Novel"
+   },
+   {
+   "author": "Madeline Miller",
+   "id": 8,
+   "rating": 5,
+   "title": "CIRCE"
+   }
+   ],
+   "success": true,
+   "total_books": 2
+   }
+
+2. Update Rating (Change rating of a book)
+   endpoint: '/books/<int:book_id>'
+   method: "PATCH"
+   sample request: curl http://127.0.0.1:5000/books/15 -X PATCH -H "Content-Type: application/json" -d '{"rating":"1"}'
+   return: {
+   "id": 15,
+   "success": true
+   }
+
+3. Delete Book (Delete a particular book)
+   endpoint: '/books/<int:book_id>'
+   method: DELETE
+   sample request: curl -X DELETE http://127.0.0.1:5000/books/16?page=2
+   return: {
+   "books": [
+   {
+   "author": "Gina Apostol",
+   "id": 9,
+   "rating": 5,
+   "title": "Insurrecto: A Novel"
+   },
+   {
+   "author": "Tayari Jones",
+   "id": 10,
+   "rating": 5,
+   "title": "An American Marriage"
+   },
+   ],
+   "deleted": 16,
+   "success": true,
+   "total_books": 2
+   }
+
+4. Create Book (Create a new book)
+   endpoint: '/books'
+   method: 'POST'
+   sample request: curl http://127.0.0.1:5000/books?page=3 -X POST -H "Content-Type: application/json" -d '{"title":"Neverwhere", "author":"Neil Gaiman", "rating":"5"}'
+   return: {
+   "books": [
+   {
+   "author": "Neil Gaiman",
+   "id": 24,
+   "rating": 5,
+   "title": "Neverwhere"
+   }
+   ],
+   "created": 24,
+   "success": true,
+   "total_books": 3
+   }
