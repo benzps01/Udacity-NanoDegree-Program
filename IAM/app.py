@@ -1,15 +1,15 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, jsonify
 from functools import wraps
 import json
 from jose import jwt
 from urllib.request import urlopen
 
 
-app =Flask(__name__)
+app = Flask(__name__)
 
 AUTH0_DOMAIN = 'fsnd-beast101.us.auth0.com'
 ALGORITHMS = ['RS256']
-API_AUDIENCE = 'image'
+API_AUDIENCE = "image"
 
 class AuthError(Exception):
     def __init__(self, error, status_code):
@@ -21,7 +21,7 @@ def get_token_auth_header():
     if not auth:
         raise AuthError({
             'code': 'authorization_header_missing',
-            'description': 'Authorization header is xpected.'
+            'description': 'Authorization header is expected.'
         }, 401)
         
     parts = auth.split()
@@ -122,15 +122,24 @@ def requires_auth(permission=''):
     return requires_auth_decorator
 
 # @app.route('/headers')
-# @requires_auth
+# @requires_auth('get:images')
 # def headers(payload):
 #     print(payload)
 #     return 'Access Granted'
 
 @app.route('/image')
-@requires_auth('get:images')
-def images(payload):
-    print(payload)
+def images():
+    #print(payload)
     return 'Not implemented'
+
+
+@app.errorhandler(AuthError)
+def handle_auth_error(ex):
+    """
+    Receive the raised authorization error and propagates it as response
+    """
+    response = jsonify(ex.error)
+    response.status_code = ex.status_code
+    return response
         
         
