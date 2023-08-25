@@ -8,4 +8,4 @@ This is the public repository for Udacity's Full-Stack Nanodegree program. Here,
 
 Feel free to suggest edits in the current repo by raising a PR.
 
-
+Changes for git commit contrib
